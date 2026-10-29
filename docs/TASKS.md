@@ -26,11 +26,11 @@ Rules for this file:
 
 ## Phase F1 — API foundation (Day 1–2)
 
-- [ ] **F1.1** Redux store, typed hooks, `StoreProvider`. `base-api.ts` with `fetchBaseQuery` (`credentials: 'include'`), envelope unwrapping, error normalization into `ApiError` (§6). Unit tests for the normalization.
-- [ ] **F1.2** 🔒 Auth slice and refresh logic: in-memory access token, auth header, refresh-on-401 with **single-flight** (concurrent 401s trigger one refresh), retry once, logout/clear on refresh failure. Tests: two simultaneous 401s call refresh once; failed refresh clears state; no token is ever written to storage.
-- [ ] **F1.3** 🔒 `AuthProvider` and `(app)` layout guard: on load call `/auth/refresh`, then `/users/me`; show a loading screen meanwhile; redirect to `/login` when unauthenticated (remember the requested internal path); redirect logged-in users away from `/login` and `/register`. Logout resets all API state.
-- [ ] **F1.4** Organization slice (§4.3): current organization id persisted in `localStorage`, validated against the user's organization list, redirect to `/onboarding` when none. A `useCurrentOrgId()` hook. Clear on a 404 for the current organization.
-- [ ] **F1.5** Common components and helpers: `PageHeader`, `EmptyState`, `ErrorState`, skeletons, `StatusBadge`, `SeverityBadge` (token colors, text labels), and `lib/format.ts` (money with org currency, signed percent, dates). Unit tests for formatting.
+- [x] **F1.1** Redux store, typed hooks, `StoreProvider`. `base-api.ts` with `fetchBaseQuery` (`credentials: 'include'`), envelope unwrapping, error normalization into `ApiError` (§6). Unit tests for the normalization.
+- [x] **F1.2** 🔒 Auth slice and refresh logic: in-memory access token, auth header, refresh-on-401 with **single-flight** (concurrent 401s trigger one refresh), retry once, logout/clear on refresh failure. Tests: two simultaneous 401s call refresh once; failed refresh clears state; no token is ever written to storage.
+- [x] **F1.3** 🔒 `AuthProvider` and `(app)` layout guard: on load call `/auth/refresh`, then `/users/me`; show a loading screen meanwhile; redirect to `/login` when unauthenticated (remember the requested internal path); redirect logged-in users away from `/login` and `/register`. Logout resets all API state.
+- [x] **F1.4** Organization slice (§4.3): current organization id persisted in `localStorage`, validated against the user's organization list, redirect to `/onboarding` when none. A `useCurrentOrgId()` hook. Clear on a 404 for the current organization.
+- [x] **F1.5** Common components and helpers: `PageHeader`, `EmptyState`, `ErrorState`, skeletons, `StatusBadge`, `SeverityBadge` (token colors, text labels), and `lib/format.ts` (money with org currency, signed percent, dates). Unit tests for formatting.
 
 ## Phase F2 — Auth pages and onboarding (Day 2)
 
