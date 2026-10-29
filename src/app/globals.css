@@ -1,0 +1,122 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme (docs/UI_SPEC.md §2.1) */
+    --background: 210 40% 98%;
+    --card: 0 0% 100%;
+    --border: 214 32% 91%;
+    --foreground: 222 47% 11%;
+    --muted-foreground: 215 16% 47%;
+    --primary: 243 75% 59%;
+    --primary-hover: 245 58% 51%;
+    --primary-subtle: 226 100% 97%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --input: 214 32% 91%;
+    --ring: 243 75% 59%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --radius: 0.5rem;
+
+    /* Severity tokens */
+    --severity-high: 0 72% 51%;
+    --severity-high-bg: 0 86% 97%;
+    --severity-high-foreground: 0 72% 51%;
+    --severity-medium: 32 95% 44%;
+    --severity-medium-bg: 48 100% 96%;
+    --severity-medium-foreground: 32 95% 44%;
+
+    /* Status tokens */
+    --status-open: 215 19% 35%;
+    --status-open-bg: 210 40% 96%;
+    --status-open-foreground: 215 19% 35%;
+    --status-investigating: 243 75% 59%;
+    --status-investigating-bg: 226 100% 97%;
+    --status-investigating-foreground: 243 75% 59%;
+    --status-resolved: 142 76% 36%;
+    --status-resolved-bg: 138 76% 97%;
+    --status-resolved-foreground: 142 76% 36%;
+
+    /* Metric direction tokens */
+    --metric-up: 142 76% 36%;
+    --metric-down: 0 72% 51%;
+  }
+
+  .dark {
+    /* Dark theme (docs/UI_SPEC.md §2.1) */
+    --background: 229 84% 5%;
+    --card: 222 47% 11%;
+    --border: 217 33% 17%;
+    --foreground: 210 40% 96%;
+    --muted-foreground: 215 20% 65%;
+    --primary: 239 84% 67%;
+    --primary-hover: 234 89% 74%;
+    --primary-subtle: 244 47% 20%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 33% 17%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 91% 71%;
+    --destructive-foreground: 229 84% 5%;
+    --input: 217 33% 17%;
+    --ring: 239 84% 67%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 96%;
+    --radius: 0.5rem;
+
+    /* Severity tokens */
+    --severity-high: 0 91% 71%;
+    --severity-high-bg: 0 75% 15%;
+    --severity-high-foreground: 0 91% 71%;
+    --severity-medium: 43 96% 56%;
+    --severity-medium-bg: 21 92% 14%;
+    --severity-medium-foreground: 43 96% 56%;
+
+    /* Status tokens */
+    --status-open: 213 27% 84%;
+    --status-open-bg: 217 33% 17%;
+    --status-open-foreground: 213 27% 84%;
+    --status-investigating: 230 94% 82%;
+    --status-investigating-bg: 244 47% 20%;
+    --status-investigating-foreground: 230 94% 82%;
+    --status-resolved: 142 69% 58%;
+    --status-resolved-bg: 145 80% 10%;
+    --status-resolved-foreground: 142 69% 58%;
+
+    /* Metric direction tokens */
+    --metric-up: 142 69% 58%;
+    --metric-down: 0 91% 71%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  /* Tabular numerals for KPI numbers and percentages */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  /* One-file font swap hook */
+  .font-sans {
+    font-family: var(--font-sans);
+  }
+}
