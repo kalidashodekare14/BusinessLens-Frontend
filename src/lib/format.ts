@@ -26,6 +26,8 @@ export function formatSignedPercent(
   return `${sign}${(value * 100).toFixed(fractionDigits)}%`;
 }
 
+export const formatPercent = formatSignedPercent;
+
 export function formatDate(
   date: string | Date | null | undefined,
   options?: Intl.DateTimeFormatOptions
@@ -53,3 +55,4 @@ export function formatDateTime(
     return d.toISOString().replace("T", " ").split(".")[0];
   }
 }
+

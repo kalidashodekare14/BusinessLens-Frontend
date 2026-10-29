@@ -16,7 +16,7 @@ import { useLogout } from "@/features/auth/use-logout";
 
 export function UserMenu() {
   const { data: user } = useGetMeQuery();
-  const { logout } = useLogout();
+  const logout = useLogout();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -46,3 +46,4 @@ export function UserMenu() {
     </DropdownMenu>
   );
 }
+

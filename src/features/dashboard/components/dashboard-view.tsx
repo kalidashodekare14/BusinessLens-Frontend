@@ -1,5 +1,6 @@
 "use client";
 
+import { Card, CardContent } from "@/components/ui/card";
 import { useAppSelector } from "@/store/hooks";
 import { useGetDashboardQuery, useGetMetricsOverviewQuery } from "../dashboard-api";
 import { KPICard } from "./kpi-card";

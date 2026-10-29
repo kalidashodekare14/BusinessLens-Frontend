@@ -4,31 +4,32 @@ import { useEffect, useState } from "react";
 import { useGetAnalysisRunQuery } from "./analysis-api";
 
 export function useAnalysisRunPolling(organizationId: string | null, runId: string | null, enabled: boolean) {
-  const [isPolling, setIsPolling] = useState(enabled && !!runId);
-  const { data: run, refetch } = useGetAnalysisRunQuery(
+  const [isPolling, setIsPolling] = useState(false);
+  const { data: run } = useGetAnalysisRunQuery(
     { organizationId: organizationId!, runId: runId! },
     { skip: !organizationId || !runId || !isPolling }
   );
 
   useEffect(() => {
-    if (!isPolling || !runId) return;
-    if (run?.status === "COMPLETED" || run?.status === "FAILED") {
-      setIsPolling(false);
-      return;
+    let timer: any;
+    if (enabled && runId) {
+      timer = setTimeout(() => setIsPolling(true), 0);
+    } else {
+      timer = setTimeout(() => setIsPolling(false), 0);
     }
-    const interval = setInterval(() => {
-      refetch();
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [isPolling, runId, run?.status, refetch]);
+    return () => clearTimeout(timer);
+  }, [enabled, runId]);
 
   useEffect(() => {
-    if (enabled && runId) {
-      setIsPolling(true);
-    } else if (!enabled) {
-      setIsPolling(false);
+    if (run?.status === "COMPLETED" || run?.status === "FAILED") {
+      const timer = setTimeout(() => setIsPolling(false), 0);
+      return () => clearTimeout(timer);
     }
-  }, [enabled, runId]);
+  }, [run?.status]);
 
   return { run, isPolling };
 }
+
+
+
+
