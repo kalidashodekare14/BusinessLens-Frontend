@@ -42,12 +42,12 @@ Rules for this file:
 
 ## Phase F3 — App shell and dashboard (Day 2–3)
 
-- [ ] **F3.1** App shell (§5): sidebar (Dashboard, Findings, Imports, Analysis, Settings), header with business name, theme toggle and user menu with logout, mobile sheet menu.
-- [ ] **F3.2** `dashboard-api.ts` and `analysis-api.ts` endpoints (dashboard, metrics overview, analysis runs list/get/start) with tags; a hook that starts a run and polls its status every 2 s until `COMPLETED` or `FAILED`, then invalidates `Finding`, `Dashboard`, `Metrics`.
-- [ ] **F3.3** Dashboard header and KPI cards (§6): business name, period text, **data through** date, Revenue / Orders / Average order value with previous value and signed change %, Open findings card. Component test.
-- [ ] **F3.4** Dashboard "Needs attention" list (up to 5 OPEN findings, HIGH first then newest, link to detail), "Latest analysis" card with "Run analysis", and the getting-started checklist.
-- [ ] **F3.5** Dashboard states (§6 table): no data, data but no analysis, running, failed, completed with findings, completed with none. Component test per state.
-- [ ] **F3.6** ⏸ **Checkpoint.** Owner runs the flow: register → onboarding → load demo data → dashboard → Run analysis → KPI cards and findings appear, in light and dark. Fix what the owner reports before continuing.
+- [x] **F3.1** App shell (§5): sidebar (Dashboard, Findings, Imports, Analysis, Settings), header with business name, theme toggle and user menu with logout, mobile sheet menu.
+- [x] **F3.2** `dashboard-api.ts` and `analysis-api.ts` endpoints (dashboard, metrics overview, analysis runs list/get/start) with tags; a hook that starts a run and polls its status every 2 s until `COMPLETED` or `FAILED`, then invalidates `Finding`, `Dashboard`, `Metrics`.
+- [x] **F3.3** Dashboard header and KPI cards (§6): business name, period text, **data through** date, Revenue / Orders / Average order value with previous value and signed change %, Open findings card. Component test.
+- [x] **F3.4** Dashboard "Needs attention" list (up to 5 OPEN findings, HIGH first then newest, link to detail), "Latest analysis" card with "Run analysis", and the getting-started checklist.
+- [x] **F3.5** Dashboard states (§6 table): no data, data but no analysis, running, failed, completed with findings, completed with none. Component test per state.
+- [x] **F3.6** ⏸ **Checkpoint.** Owner runs the flow: register → onboarding → load demo data → dashboard → Run analysis → KPI cards and findings appear, in light and dark. Fix what the owner reports before continuing.
 
 ## Phase F4 — Findings (Day 3–4)
 
