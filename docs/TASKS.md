@@ -34,11 +34,11 @@ Rules for this file:
 
 ## Phase F2 — Auth pages and onboarding (Day 2)
 
-- [ ] **F2.1** Split-screen auth layout (`docs/UI_SPEC.md` §3.1): form column plus brand panel on desktop, form only on mobile; works in both themes.
-- [ ] **F2.2** `/login` (§3.2): validation, generic error handling (invalid credentials, 429, network), redirect rules, show/hide password.
-- [ ] **F2.3** `/register` (§3.3): fields, live password checklist, server error display, auto-login and redirect to `/onboarding`. No confirm-password field. "Terms" and "Privacy Policy" are plain text until F7.6 turns them into links (the pages do not exist yet).
-- [ ] **F2.4** `/onboarding` step 1 (§4): stepper, create the organization (name, currency, time zone).
-- [ ] **F2.5** `/onboarding` step 2: "Load demo data" (demo-data endpoint, loading state, toast, go to dashboard), "Start import" (go to `/imports/new`), "I'll do this later". Handles loading and errors.
+- [x] **F2.1** Split-screen auth layout (`docs/UI_SPEC.md` §3.1): form column plus brand panel on desktop, form only on mobile; works in both themes.
+- [x] **F2.2** `/login` (§3.2): validation, generic error handling (invalid credentials, 429, network), redirect rules, show/hide password.
+- [x] **F2.3** `/register` (§3.3): fields, live password checklist, server error display, auto-login and redirect to `/onboarding`. No confirm-password field. "Terms" and "Privacy Policy" are plain text until F7.6 turns them into links (the pages do not exist yet).
+- [x] **F2.4** `/onboarding` step 1 (§4): stepper, create the organization (name, currency, time zone).
+- [x] **F2.5** `/onboarding` step 2: "Load demo data" (demo-data endpoint, loading state, toast, go to dashboard), "Start import" (go to `/imports/new`), "I'll do this later". Handles loading and errors.
 
 ## Phase F3 — App shell and dashboard (Day 2–3)
 
