@@ -51,12 +51,12 @@ Rules for this file:
 
 ## Phase F4 — Findings (Day 3–4)
 
-- [ ] **F4.1** `findings-api.ts` endpoints with tags (list, detail, status, notes, regenerate explanation).
-- [ ] **F4.2** `/findings` list: table with severity, status, title, change %, date; filters for status, severity, type stored in the URL query; pagination; empty state.
-- [ ] **F4.3** `/findings/[findingId]` layout and `EvidencePanel` (UI_SPEC §7): current vs previous with period dates, change %, thresholds, related metrics, collapsible raw evidence for unknown fields. Component tests with a revenue, an orders and a product evidence sample.
-- [ ] **F4.4** `ExplanationPanel`: all states (pending/generating with polling, completed with labeled sections, failed with "Try again", slow after about 2 minutes). Rendered as plain text. Component test for each state.
-- [ ] **F4.5** `StatusControl`: only valid next transitions, confirmation for RESOLVED with the "your investigation outcome" wording, 409 handling, cache invalidation. Unit test for the transition helper.
-- [ ] **F4.6** `Notes`: list, add form (validation), delete own notes only.
+- [x] **F4.1** `findings-api.ts` endpoints with tags (list, detail, status, notes, regenerate explanation).
+- [x] **F4.2** `/findings` list: table with severity, status, title, change %, date; filters for status, severity, type stored in the URL query; pagination; empty state.
+- [x] **F4.3** `/findings/[findingId]` layout and `EvidencePanel` (UI_SPEC §7): current vs previous with period dates, change %, thresholds, related metrics, collapsible raw evidence for unknown fields. Component tests with a revenue, an orders and a product evidence sample.
+- [x] **F4.4** `ExplanationPanel`: all states (pending/generating with polling, completed with labeled sections, failed with "Try again", slow after about 2 minutes). Rendered as plain text. Component test for each state.
+- [x] **F4.5** `StatusControl`: only valid next transitions, confirmation for RESOLVED with the "your investigation outcome" wording, 409 handling, cache invalidation. Unit test for the transition helper.
+- [x] **F4.6** `Notes`: list, add form (validation), delete own notes only.
 
 ## Phase F5 — Imports and analysis pages (Day 4–5)
 

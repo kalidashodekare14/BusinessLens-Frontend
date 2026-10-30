@@ -15,7 +15,6 @@ export function ExplanationPanel({ findingId }: { findingId: string }) {
     { skip: !orgId, pollingInterval: 2000 }
   );
   const [regenerate, { isLoading: regenerating }] = useRegenerateFindingExplanationMutation();
-  const [startedAt] = useState(Date.now());
   const [slow, setSlow] = useState(false);
 
   useEffect(() => {
@@ -123,7 +122,7 @@ export function ExplanationPanel({ findingId }: { findingId: string }) {
         )}
         {explanation?.whatWeDontKnow && explanation.whatWeDontKnow.length > 0 && (
           <div>
-            <div className="font-medium mb-1">What we don't know</div>
+            <div className="font-medium mb-1">What we don&apos;t know</div>
             <ul className="list-disc pl-5 space-y-1">
               {explanation.whatWeDontKnow.map((f, i) => <li key={i}>{f}</li>)}
             </ul>

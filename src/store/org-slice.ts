@@ -47,4 +47,5 @@ const orgSlice = createSlice({
 });
 
 export const { setCurrentOrganizationId, clearOrg } = orgSlice.actions;
+export const selectCurrentOrgId = (state: any) => state.org?.currentOrganizationId;
 export default orgSlice.reducer;

@@ -7,13 +7,13 @@ import { useSelector } from "react-redux";
 import { selectCurrentOrgId } from "@/store/org-slice";
 import { useListFindingsQuery } from "@/features/findings/findings-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState } from "@/components/common";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate } from "@/lib/format";
+import { useMemo } from "react";
 
 const severityColors: Record<string, string> = {
   HIGH: "bg-[hsl(var(--severity-high-bg))] text-[hsl(var(--severity-high))] border-transparent",
@@ -43,7 +43,7 @@ export default function FindingsPage() {
     { skip: !orgId }
   );
 
-  const findings = Array.isArray(data) ? data : [];
+  const findings = useMemo(() => (Array.isArray(data) ? data : []), [data]);
 
   const updateFilter = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
