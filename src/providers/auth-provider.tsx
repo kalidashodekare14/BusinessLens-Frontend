@@ -3,7 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setToken, setStatus, clearAuth } from "@/store/auth-slice";
+import { setToken, clearAuth } from "@/store/auth-slice";
 import { baseApi } from "@/store/base-api";
 
 const AUTH_ROUTES = ["/login", "/register"];
@@ -14,20 +14,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const status = useAppSelector((state) => state.auth.status);
+  const reduxAccessToken = useAppSelector((state) => state.auth.accessToken);
   const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
     let mounted = true;
     async function bootstrap() {
       try {
-        // Track the access token locally within this bootstrap run. The Redux
-        // selector value is captured at render time and would be stale after
-        // setToken() dispatches synchronously, which caused GET /users/me to
-        // be sent without a Bearer token on hard reload, fail with 401, clear
-        // auth, and redirect to /login.
-        let token: string | null = null;
+        // Seed from the existing session (for example the token the login or
+        // register page stored just before navigating here). /auth/refresh may
+        // upgrade it, but a refresh failure must not clobber a valid token we
+        // already hold — otherwise GET /users/me is sent without a Bearer
+        // header, 401s, clears auth and kicks the user back to /login.
+        let token: string | null = reduxAccessToken;
 
-        // Try refresh first
+        // Try refresh first (may return a new access token).
         const refreshRes = await fetch("/api/v1/auth/refresh", {
           method: "POST",
           credentials: "include",
@@ -35,19 +36,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
         if (refreshRes.ok) {
           const data = await refreshRes.json().catch(() => null);
-          token =
+          const refreshed =
             data?.accessToken ||
             data?.data?.accessToken ||
             data?.token ||
             data?.data?.token ||
             null;
-          if (token) {
-            dispatch(setToken(token));
-          } else {
-            dispatch(setStatus("authenticated"));
+          if (refreshed) {
+            token = refreshed;
+            dispatch(setToken(refreshed));
           }
-        } else {
-          dispatch(setStatus("unauthenticated"));
         }
 
         // Get current user
@@ -61,10 +59,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (!mounted) return;
         if (!meRes || !meRes.ok) {
-          // If refresh didn't give us token and me failed, unauthenticated
+          // No valid session: clear and let the guard redirect to /login.
           dispatch(clearAuth());
         } else if (token) {
-          // /users/me validated the existing access token; keep auth state authenticated
+          // /users/me validated the access token; keep auth state authenticated.
           dispatch(setToken(token));
         }
       } catch {
@@ -79,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, [dispatch]);
+  }, [dispatch, reduxAccessToken]);
 
   useEffect(() => {
     if (!bootstrapped) return;
