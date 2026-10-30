@@ -14,15 +14,20 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
-const canonicalFields = [
-  { key: "orderDate", label: "Order Date", required: true },
-  { key: "orderNumber", label: "Order Number", required: false },
-  { key: "productSku", label: "Product SKU", required: false },
-  { key: "productName", label: "Product Name", required: false },
+const orderFields = [
+  { key: "orderId", label: "Order ID", required: true },
+  { key: "orderedAt", label: "Ordered At", required: true },
+  { key: "status", label: "Status", required: false },
+  { key: "productName", label: "Product Name", required: true },
+  { key: "sku", label: "SKU", required: false },
   { key: "quantity", label: "Quantity", required: true },
   { key: "unitPrice", label: "Unit Price", required: true },
-  { key: "lineTotal", label: "Line Total", required: false },
-  { key: "customerId", label: "Customer ID", required: false },
+];
+
+const productFields = [
+  { key: "name", label: "Name", required: true },
+  { key: "sku", label: "SKU", required: false },
+  { key: "price", label: "Price", required: false },
 ];
 
 export default function ImportDetailPage({ params }: { params: { importId: string } }) {
@@ -42,8 +47,9 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
 
   const initialMapping = (() => {
     const m: Record<string, string> = {};
-    if (importData?.mapping) {
-      Object.entries(importData.mapping).forEach(([k, v]) => {
+    const sourceMapping = importData?.columnMapping || importData?.mapping;
+    if (sourceMapping) {
+      Object.entries(sourceMapping).forEach(([k, v]) => {
         if (v) m[k] = v as string;
       });
     }
@@ -61,6 +67,8 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
       </div>
     );
   }
+
+  const canonicalFields = importData.type === "PRODUCTS" ? productFields : orderFields;
 
   const handleSaveMapping = async () => {
     if (!orgId) return;
@@ -93,16 +101,16 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Import Details" description={`File: ${importData.fileName} • Type: ${importData.type} • Status: ${importData.status}`} />
+      <PageHeader title="Import Details" description={`File: ${importData.originalFileName ?? importData.fileName} • Type: ${importData.type} • Status: ${importData.status}`} />
       {importData.status === "PROCESSING" ? (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm">Processing... {importData.processedCount || 0} / {importData.rowCount || 0} rows processed</p>
-            {importData.failedCount ? <p className="text-sm text-destructive">{importData.failedCount} failed</p> : null}
+            <p className="text-sm">Processing... {importData.processedRows ?? importData.processedCount ?? 0} / {importData.totalRows ?? importData.rowCount ?? 0} rows processed</p>
+            {importData.failedRows ?? importData.failedCount ? <p className="text-sm text-destructive">{importData.failedRows ?? importData.failedCount} failed</p> : null}
           </CardContent>
         </Card>
       ) : null}
-      {importData.status === "FAILED" || (importData.status === "COMPLETED" && importData.failedCount && importData.failedCount > 0) ? (
+      {importData.status === "FAILED" || (importData.status === "COMPLETED" && (importData.failedRows ?? importData.failedCount) && (importData.failedRows ?? importData.failedCount)! > 0) ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Errors</CardTitle>
@@ -133,7 +141,7 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
           </CardContent>
         </Card>
       ) : null}
-      {(importData.status === "UPLOADED" || importData.status === "MAPPING") && step === "mapping" ? (
+      {(importData.status === "UPLOADED" || importData.status === "MAPPED") && step === "mapping" ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Map Columns</CardTitle>
@@ -185,7 +193,7 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
           </CardContent>
         </Card>
       ) : null}
-      {(importData.status === "UPLOADED" || importData.status === "MAPPING") && step === "preview" ? (
+      {(importData.status === "UPLOADED" || importData.status === "MAPPED") && step === "preview" ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Preview and Confirm</CardTitle>
@@ -203,10 +211,10 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
           </CardContent>
         </Card>
       ) : null}
-      {importData.status === "COMPLETED" && !(importData.failedCount && importData.failedCount > 0) ? (
+      {importData.status === "COMPLETED" && !((importData.failedRows ?? importData.failedCount) && (importData.failedRows ?? importData.failedCount)! > 0) ? (
         <Card>
           <CardContent className="pt-6">
-            <p className="text-sm">Import completed successfully. {importData.processedCount || importData.rowCount || 0} rows processed.</p>
+            <p className="text-sm">Import completed successfully. {importData.processedRows ?? importData.processedCount ?? importData.totalRows ?? importData.rowCount ?? 0} rows processed.</p>
           </CardContent>
         </Card>
       ) : null}

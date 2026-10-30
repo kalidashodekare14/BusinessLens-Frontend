@@ -30,7 +30,7 @@ export function LatestAnalysisCard({ organizationId, latestRun }: { organization
         <CardTitle className="text-sm font-medium">Latest analysis</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
-        {status === "RUNNING" || status === "PENDING" ? (
+        {status === "RUNNING" || status === "QUEUED" ? (
           <div className="text-sm text-muted-foreground">Analyzing…</div>
         ) : status === "COMPLETED" ? (
           <div>

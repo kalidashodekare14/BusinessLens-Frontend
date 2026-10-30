@@ -86,9 +86,8 @@ export default function FindingsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All severities</SelectItem>
-              <SelectItem value="HIGH">High</SelectItem>
-              <SelectItem value="MEDIUM">Medium</SelectItem>
-              <SelectItem value="LOW">Low</SelectItem>
+               <SelectItem value="HIGH">High</SelectItem>
+               <SelectItem value="MEDIUM">Medium</SelectItem>
             </SelectContent>
           </Select>
 

@@ -17,8 +17,7 @@ export type UUID = string;
 export type User = {
   id: UUID;
   email: string;
-  fullName: string;
-  createdAt: ISODateString;
+  name: string;  createdAt: ISODateString;
   updatedAt: ISODateString;
 };
 
@@ -44,7 +43,7 @@ export type AuthResponse = {
 export type SessionUser = User;
 
 export type ImportType = "ORDERS" | "PRODUCTS";
-export type ImportStatus = "UPLOADED" | "MAPPING" | "PROCESSING" | "COMPLETED" | "FAILED";
+export type ImportStatus = "UPLOADED" | "MAPPED" | "PROCESSING" | "COMPLETED" | "FAILED";
 
 export type ImportRowError = {
   row: number;
@@ -58,15 +57,23 @@ export type Import = {
   id: UUID;
   organizationId: UUID;
   type: ImportType;
-  fileName: string;
+  fileName?: string;
+  originalFileName?: string;
   status: ImportStatus;
   mapping?: ImportMapping | null;
+  columnMapping?: ImportMapping | null;
+  suggestedMapping?: ImportMapping | null;
+  detectedHeaders?: string[];
   rowCount?: number | null;
+  totalRows?: number | null;
   processedCount?: number | null;
+  processedRows?: number | null;
   failedCount?: number | null;
+  failedRows?: number | null;
   errors?: ImportRowError[] | null;
+  completedAt?: ISODateString | null;
   createdAt: ISODateString;
-  updatedAt: ISODateString;
+  updatedAt?: ISODateString;
 };
 
 export type Product = {
@@ -139,7 +146,7 @@ export type AnalysisRun = {
   updatedAt: ISODateString;
 };
 
-export type FindingSeverity = "HIGH" | "MEDIUM" | "LOW";
+export type FindingSeverity = "HIGH" | "MEDIUM";
 export type FindingStatus = "OPEN" | "INVESTIGATING" | "RESOLVED";
 export type FindingType = string;
 
@@ -154,8 +161,12 @@ export type Finding = {
   status: FindingStatus;
   title: string;
   description?: string | null;
+  subjectKey?: string | null;
+  ruleVersion?: string | null;
   changePct?: number | null;
   evidence?: FindingEvidence | null;
+  explanation?: any;
+  notes?: any[];
   detectedAt?: ISODateString | null;
   createdAt: ISODateString;
   updatedAt: ISODateString;
@@ -182,7 +193,8 @@ export type FindingNote = {
   findingId: UUID;
   authorId: UUID;
   authorName?: string | null;
-  content: string;
+  body: string;
+  content?: string;
   createdAt: ISODateString;
   updatedAt: ISODateString;
 };

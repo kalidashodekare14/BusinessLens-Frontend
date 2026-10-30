@@ -12,10 +12,9 @@ export const dashboardApi = baseApi.injectEndpoints({
       },
       providesTags: ["Dashboard"],
     }),
-    getMetricsOverview: builder.query<any, { organizationId: string; period?: string }>({
-      query: ({ organizationId, period }) => ({
+    getMetricsOverview: builder.query<any, { organizationId: string }>({
+      query: ({ organizationId }) => ({
         url: `/organizations/${organizationId}/metrics/overview`,
-        params: period ? { period } : undefined,
       }),
       transformResponse: (response: any) => {
         if (response && typeof response === "object" && "data" in response && Object.keys(response).length <= 2) {

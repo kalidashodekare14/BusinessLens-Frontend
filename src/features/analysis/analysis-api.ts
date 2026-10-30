@@ -2,10 +2,17 @@ import { baseApi } from "@/store/base-api";
 
 export interface AnalysisRun {
   id: string;
-  status: "PENDING" | "RUNNING" | "COMPLETED" | "FAILED";
+  status: "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED";
   createdAt: string;
   completedAt?: string;
   findingsCount?: number;
+  referenceDate?: string;
+  currentStart?: string;
+  currentEnd?: string;
+  previousStart?: string;
+  previousEnd?: string;
+  errorMessage?: string | null;
+  metricsSnapshot?: unknown;
 }
 
 export const analysisApi = baseApi.injectEndpoints({

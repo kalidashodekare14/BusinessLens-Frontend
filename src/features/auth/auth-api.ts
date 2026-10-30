@@ -9,13 +9,13 @@ export interface LoginRequest {
 export interface RegisterRequest {
   email: string;
   password: string;
-  fullName: string;
+  name: string;
 }
 
 export interface CreateOrgRequest {
   name: string;
-  currency: string;
-  timezone: string;
+  currency?: string;
+  timezone?: string;
 }
 
 export interface ChangePasswordRequest {
@@ -80,6 +80,20 @@ const authApi = baseApi.injectEndpoints({
       },
       providesTags: ["User"],
     }),
+    updateMe: builder.mutation<User, { name: string }>({
+      query: (body) => ({
+        url: "/users/me",
+        method: "PATCH",
+        body,
+      }),
+      transformResponse: (response: any) => {
+        if (response && typeof response === "object" && "data" in response && Object.keys(response).length <= 2) {
+          return response.data;
+        }
+        return response;
+      },
+      invalidatesTags: ["User"],
+    }),
     changePassword: builder.mutation<void, ChangePasswordRequest>({
       query: (body) => ({
         url: "/users/me/change-password",
@@ -91,7 +105,7 @@ const authApi = baseApi.injectEndpoints({
       query: (body) => ({
         url: "/organizations",
         method: "POST",
-        body,
+        body: { name: body.name },
       }),
       transformResponse: (response: any) => {
         if (response && typeof response === "object" && "data" in response && Object.keys(response).length <= 2) {
@@ -111,11 +125,41 @@ const authApi = baseApi.injectEndpoints({
       },
       providesTags: ["Organization"],
     }),
-    loadDemoData: builder.mutation<void, string>({
+    getOrganization: builder.query<Organization, string>({
+      query: (organizationId) => `/organizations/${organizationId}`,
+      transformResponse: (response: any) => {
+        if (response && typeof response === "object" && "data" in response && Object.keys(response).length <= 2) {
+          return response.data;
+        }
+        return response;
+      },
+      providesTags: (result, error, arg) => [{ type: "Organization", id: arg }],
+    }),
+    updateOrganization: builder.mutation<Organization, { organizationId: string; name: string }>({
+      query: ({ organizationId, name }) => ({
+        url: `/organizations/${organizationId}`,
+        method: "PATCH",
+        body: { name },
+      }),
+      transformResponse: (response: any) => {
+        if (response && typeof response === "object" && "data" in response && Object.keys(response).length <= 2) {
+          return response.data;
+        }
+        return response;
+      },
+      invalidatesTags: (result, error, arg) => [{ type: "Organization", id: arg.organizationId }, "Organization"],
+    }),
+    loadDemoData: builder.mutation<any, string>({
       query: (organizationId) => ({
         url: `/organizations/${organizationId}/demo-data`,
         method: "POST",
       }),
+      transformResponse: (response: any) => {
+        if (response && typeof response === "object" && "data" in response && Object.keys(response).length <= 2) {
+          return response.data;
+        }
+        return response;
+      },
     }),
   }),
 });
@@ -126,8 +170,11 @@ export const {
   useRefreshMutation,
   useLogoutMutation,
   useGetMeQuery,
+  useUpdateMeMutation,
   useChangePasswordMutation,
   useCreateOrganizationMutation,
   useGetOrganizationsQuery,
+  useGetOrganizationQuery,
+  useUpdateOrganizationMutation,
   useLoadDemoDataMutation,
 } = authApi;

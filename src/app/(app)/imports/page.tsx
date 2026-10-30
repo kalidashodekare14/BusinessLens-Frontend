@@ -14,7 +14,7 @@ import { formatDateTime } from "@/lib/format";
 
 const statusColors: Record<string, string> = {
   UPLOADED: "bg-muted text-muted-foreground border-transparent",
-  MAPPING: "bg-muted text-muted-foreground border-transparent",
+  MAPPED: "bg-muted text-muted-foreground border-transparent",
   PROCESSING: "bg-[hsl(var(--status-investigating-bg))] text-[hsl(var(--status-investigating))] border-transparent",
   COMPLETED: "bg-[hsl(var(--status-resolved-bg))] text-[hsl(var(--status-resolved))] border-transparent",
   FAILED: "bg-destructive/10 text-destructive border-transparent",
@@ -72,7 +72,7 @@ export default function ImportsPage() {
                     <TableCell>{imp.type}</TableCell>
                     <TableCell>
                       <Link href={`/imports/${imp.id}`} className="hover:underline font-medium">
-                        {imp.fileName}
+                        {imp.originalFileName ?? imp.fileName}
                       </Link>
                     </TableCell>
                     <TableCell>
@@ -80,9 +80,9 @@ export default function ImportsPage() {
                         {imp.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{imp.rowCount ?? "-"}</TableCell>
-                    <TableCell>{imp.processedCount ?? "-"}</TableCell>
-                    <TableCell>{imp.failedCount ?? "-"}</TableCell>
+                    <TableCell>{imp.totalRows ?? imp.rowCount ?? "-"}</TableCell>
+                    <TableCell>{imp.processedRows ?? imp.processedCount ?? "-"}</TableCell>
+                    <TableCell>{imp.failedRows ?? imp.failedCount ?? "-"}</TableCell>
                     <TableCell className="text-muted-foreground">{imp.createdAt ? formatDateTime(imp.createdAt) : "-"}</TableCell>
                   </TableRow>
                 ))}

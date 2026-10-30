@@ -4,16 +4,17 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useGetFindingExplanationQuery, useRegenerateFindingExplanationMutation } from "@/features/findings/findings-api";
+import { useGetFindingQuery, useRegenerateFindingExplanationMutation } from "@/features/findings/findings-api";
 import { useSelector } from "react-redux";
 import { selectCurrentOrgId } from "@/store/org-slice";
 
 export function ExplanationPanel({ findingId }: { findingId: string }) {
   const orgId = useSelector(selectCurrentOrgId);
-  const { data: explanation, isLoading, refetch } = useGetFindingExplanationQuery(
+  const { data: finding, isLoading } = useGetFindingQuery(
     { organizationId: orgId!, findingId },
     { skip: !orgId, pollingInterval: 2000 }
   );
+  const explanation = finding?.explanation;
   const [regenerate, { isLoading: regenerating }] = useRegenerateFindingExplanationMutation();
   const [slow, setSlow] = useState(false);
 
@@ -65,7 +66,6 @@ export function ExplanationPanel({ findingId }: { findingId: string }) {
             size="sm"
             onClick={async () => {
               await regenerate({ organizationId: orgId!, findingId });
-              refetch();
             }}
             disabled={regenerating}
           >
@@ -92,7 +92,7 @@ export function ExplanationPanel({ findingId }: { findingId: string }) {
           <div>
             <div className="font-medium mb-1">Observed facts</div>
             <ul className="list-disc pl-5 space-y-1">
-              {explanation.observedFacts.map((f, i) => <li key={i}>{f}</li>)}
+              {explanation.observedFacts.map((f: any, i: number) => <li key={i}>{f}</li>)}
             </ul>
           </div>
         )}
@@ -100,7 +100,7 @@ export function ExplanationPanel({ findingId }: { findingId: string }) {
           <div>
             <div className="font-medium mb-1">Associated signals</div>
             <ul className="list-disc pl-5 space-y-1">
-              {explanation.associatedSignals.map((f, i) => <li key={i}>{f}</li>)}
+              {explanation.associatedSignals.map((f: any, i: number) => <li key={i}>{f}</li>)}
             </ul>
           </div>
         )}
@@ -108,7 +108,7 @@ export function ExplanationPanel({ findingId }: { findingId: string }) {
           <div>
             <div className="font-medium mb-1">Possible explanations (hypotheses, not confirmed)</div>
             <ul className="list-disc pl-5 space-y-1">
-              {explanation.possibleExplanations.map((f, i) => <li key={i}>{f}</li>)}
+              {explanation.possibleExplanations.map((f: any, i: number) => <li key={i}>{f}</li>)}
             </ul>
           </div>
         )}
@@ -116,7 +116,7 @@ export function ExplanationPanel({ findingId }: { findingId: string }) {
           <div>
             <div className="font-medium mb-1">Investigation steps</div>
             <ul className="list-disc pl-5 space-y-1">
-              {explanation.investigationSteps.map((f, i) => <li key={i}>{f}</li>)}
+              {explanation.investigationSteps.map((f: any, i: number) => <li key={i}>{f}</li>)}
             </ul>
           </div>
         )}
@@ -124,7 +124,7 @@ export function ExplanationPanel({ findingId }: { findingId: string }) {
           <div>
             <div className="font-medium mb-1">What we don&apos;t know</div>
             <ul className="list-disc pl-5 space-y-1">
-              {explanation.whatWeDontKnow.map((f, i) => <li key={i}>{f}</li>)}
+              {explanation.whatWeDontKnow.map((f: any, i: number) => <li key={i}>{f}</li>)}
             </ul>
           </div>
         )}

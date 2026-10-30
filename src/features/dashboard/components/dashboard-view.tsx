@@ -35,7 +35,7 @@ export function DashboardView() {
   const hasData = dashboard?.hasData !== false && (metrics?.revenue !== undefined || dashboard?.metrics);
   const latestRun = dashboard?.latestAnalysisRun || run;
   const hasAnalysis = latestRun?.status === "COMPLETED";
-  const isRunning = latestRun?.status === "RUNNING" || latestRun?.status === "PENDING";
+  const isRunning = latestRun?.status === "RUNNING" || latestRun?.status === "QUEUED";
 
   if (dashLoading) {
     return <div className="space-y-4">Loading...</div>;

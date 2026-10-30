@@ -35,6 +35,19 @@ export const importsApi = baseApi.injectEndpoints({
       },
       providesTags: (result, error, arg) => [{ type: "Import", id: arg.importId }],
     }),
+    getImportErrors: builder.query<any[], { organizationId: string; importId: string; page?: number; pageSize?: number }>({
+      query: ({ organizationId, importId, page, pageSize }) => ({
+        url: `/organizations/${organizationId}/imports/${importId}/errors`,
+        params: { page, pageSize },
+      }),
+      transformResponse: (response: any) => {
+        if (response && typeof response === "object" && "data" in response && Object.keys(response).length <= 2) {
+          return response.data;
+        }
+        return response;
+      },
+      providesTags: (result, error, arg) => [{ type: "Import", id: `errors-${arg.importId}` }],
+    }),
     createImport: builder.mutation<Import, CreateImportParams>({
       query: ({ organizationId, type, file }) => {
         const formData = new FormData();
@@ -57,7 +70,7 @@ export const importsApi = baseApi.injectEndpoints({
     updateImportMapping: builder.mutation<Import, UpdateImportMappingParams>({
       query: ({ organizationId, importId, mapping }) => ({
         url: `/organizations/${organizationId}/imports/${importId}/mapping`,
-        method: "PATCH",
+        method: "PUT",
         body: { mapping },
       }),
       transformResponse: (response: any) => {
@@ -97,6 +110,7 @@ export const importsApi = baseApi.injectEndpoints({
 export const {
   useListImportsQuery,
   useGetImportQuery,
+  useGetImportErrorsQuery,
   useCreateImportMutation,
   useUpdateImportMappingMutation,
   useConfirmImportMutation,

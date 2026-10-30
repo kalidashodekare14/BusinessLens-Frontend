@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useGetFindingNotesQuery, useAddFindingNoteMutation, useDeleteFindingNoteMutation } from "@/features/findings/findings-api";
+import { useGetFindingQuery, useAddFindingNoteMutation, useDeleteFindingNoteMutation } from "@/features/findings/findings-api";
 import { useSelector } from "react-redux";
 import { selectCurrentOrgId } from "@/store/org-slice";
 import { selectCurrentUser } from "@/store/auth-slice";
@@ -14,7 +14,8 @@ import { Trash2 } from "lucide-react";
 export function Notes({ findingId }: { findingId: string }) {
   const orgId = useSelector(selectCurrentOrgId);
   const currentUser = useSelector(selectCurrentUser);
-  const { data: notes = [] } = useGetFindingNotesQuery({ organizationId: orgId!, findingId }, { skip: !orgId });
+  const { data: finding } = useGetFindingQuery({ organizationId: orgId!, findingId }, { skip: !orgId, pollingInterval: 2000 });
+  const notes = finding?.notes ?? [];
   const [addNote, { isLoading: adding }] = useAddFindingNoteMutation();
   const [deleteNote] = useDeleteFindingNoteMutation();
   const [content, setContent] = useState("");
@@ -28,7 +29,7 @@ export function Notes({ findingId }: { findingId: string }) {
       return;
     }
     try {
-      await addNote({ organizationId: orgId!, findingId, content: content.trim() }).unwrap();
+      await addNote({ organizationId: orgId!, findingId, body: content.trim() }).unwrap();
       setContent("");
     } catch (err: any) {
       setError(err?.data?.message || "Failed to add note");
@@ -50,7 +51,7 @@ export function Notes({ findingId }: { findingId: string }) {
           {notes.length === 0 ? (
             <p className="text-sm text-muted-foreground">No notes yet.</p>
           ) : (
-            notes.map((note) => (
+            notes.map((note: any) => (
               <div key={note.id} className="border rounded-md p-3 space-y-1">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-medium">{note.authorName || "Unknown"}</div>
@@ -68,7 +69,7 @@ export function Notes({ findingId }: { findingId: string }) {
                     )}
                   </div>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                <p className="text-sm whitespace-pre-wrap">{note.body ?? note.content}</p>
               </div>
             ))
           )}

@@ -28,7 +28,7 @@ export function UserMenu() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-2">
           <User className="h-4 w-4" />
-          <span className="hidden sm:inline">{user?.fullName || user?.email || "User"}</span>
+          <span className="hidden sm:inline">{user?.name || user?.email || "User"}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -15,7 +15,7 @@ import { formatDateTime } from "@/lib/format";
 import { toast } from "sonner";
 
 const statusColors: Record<string, string> = {
-  PENDING: "bg-muted text-muted-foreground border-transparent",
+  QUEUED: "bg-muted text-muted-foreground border-transparent",
   RUNNING: "bg-[hsl(var(--status-investigating-bg))] text-[hsl(var(--status-investigating))] border-transparent",
   COMPLETED: "bg-[hsl(var(--status-resolved-bg))] text-[hsl(var(--status-resolved))] border-transparent",
   FAILED: "bg-destructive/10 text-destructive border-transparent",
@@ -56,7 +56,7 @@ export default function AnalysisPage() {
           </Button>
         }
       />
-      {(activeRun?.status === "RUNNING" || activeRun?.status === "PENDING") && (
+      {(activeRun?.status === "RUNNING" || activeRun?.status === "QUEUED") && (
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm">Analysis running...</p>
