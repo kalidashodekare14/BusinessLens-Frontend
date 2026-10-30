@@ -1,0 +1,214 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useSelector } from "react-redux";
+import { selectCurrentOrgId } from "@/store/org-slice";
+import { useGetImportQuery, useUpdateImportMappingMutation, useConfirmImportMutation } from "@/features/imports/imports-api";
+import { PageHeader } from "@/components/common";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+
+const canonicalFields = [
+  { key: "orderDate", label: "Order Date", required: true },
+  { key: "orderNumber", label: "Order Number", required: false },
+  { key: "productSku", label: "Product SKU", required: false },
+  { key: "productName", label: "Product Name", required: false },
+  { key: "quantity", label: "Quantity", required: true },
+  { key: "unitPrice", label: "Unit Price", required: true },
+  { key: "lineTotal", label: "Line Total", required: false },
+  { key: "customerId", label: "Customer ID", required: false },
+];
+
+export default function ImportDetailPage({ params }: { params: { importId: string } }) {
+  const { importId } = params;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const orgId = useSelector(selectCurrentOrgId);
+  const stepParam = searchParams.get("step");
+  const [step, setStep] = useState<"mapping" | "preview">(stepParam === "preview" ? "preview" : "mapping");
+  const [mapping, setMapping] = useState<Record<string, string>>({});
+
+  const { data: importData, isLoading, refetch } = useGetImportQuery(
+    { organizationId: orgId!, importId },
+    { skip: !orgId, pollingInterval: 2000 }
+  );
+
+  const [updateMapping, { isLoading: savingMapping }] = useUpdateImportMappingMutation();
+  const [confirmImport, { isLoading: confirming }] = useConfirmImportMutation();
+
+  useEffect(() => {
+    if (importData?.mapping) {
+      const m: Record<string, string> = {};
+      Object.entries(importData.mapping).forEach(([k, v]) => {
+        if (v) m[k] = v as string;
+      });
+      setMapping(m);
+    }
+  }, [importData]);
+
+  if (isLoading || !importData) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Import" description="Loading..." />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  const handleSaveMapping = async () => {
+    if (!orgId) return;
+    const required = canonicalFields.filter((f) => f.required).map((f) => f.key);
+    const missing = required.filter((r) => !mapping[r]);
+    if (missing.length > 0) {
+      toast.error("Please map all required fields");
+      return;
+    }
+    try {
+      await updateMapping({ organizationId: orgId, importId, mapping }).unwrap();
+      toast.success("Mapping saved");
+      setStep("preview");
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to save mapping");
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (!orgId) return;
+    try {
+      await confirmImport({ organizationId: orgId, importId }).unwrap();
+      toast.success("Import confirmed");
+      router.push("/imports");
+      refetch();
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to confirm");
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Import Details" description={`File: ${importData.fileName} • Type: ${importData.type} • Status: ${importData.status}`} />
+      {importData.status === "PROCESSING" ? (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm">Processing... {importData.processedCount || 0} / {importData.rowCount || 0} rows processed</p>
+            {importData.failedCount ? <p className="text-sm text-destructive">{importData.failedCount} failed</p> : null}
+          </CardContent>
+        </Card>
+      ) : null}
+      {importData.status === "FAILED" || (importData.status === "COMPLETED" && importData.failedCount && importData.failedCount > 0) ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Errors</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {importData.errors && importData.errors.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Row</TableHead>
+                    <TableHead>Field</TableHead>
+                    <TableHead>Reason</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {importData.errors.slice(0, 100).map((e, i) => (
+                    <TableRow key={i}>
+                      <TableCell>{e.row}</TableCell>
+                      <TableCell>{e.field || "-"}</TableCell>
+                      <TableCell>{e.reason}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-sm text-muted-foreground">No error details available</p>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
+      {(importData.status === "UPLOADED" || importData.status === "MAPPING") && step === "mapping" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Map Columns</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              {canonicalFields.map((field) => (
+                <div key={field.key} className="space-y-2">
+                  <Label>
+                    {field.label} {field.required ? <span className="text-destructive">*</span> : null}
+                  </Label>
+                  <Select value={mapping[field.key] || ""} onValueChange={(v) => setMapping((m) => ({ ...m, [field.key]: v }))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select source column" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Not mapped</SelectItem>
+                      {(importData.mapping ? Object.keys(importData.mapping) : []).map((k) => (
+                        <SelectItem key={k} value={k}>
+                          {k}
+                        </SelectItem>
+                      ))}
+                      {/* Fallback: show common headers if mapping object doesn't list sources */}
+                      {(!importData.mapping || Object.keys(importData.mapping).length === 0) ? (
+                        <>
+                          <SelectItem value="order_date">order_date</SelectItem>
+                          <SelectItem value="orderNumber">orderNumber</SelectItem>
+                          <SelectItem value="product_sku">product_sku</SelectItem>
+                          <SelectItem value="product_name">product_name</SelectItem>
+                          <SelectItem value="quantity">quantity</SelectItem>
+                          <SelectItem value="unit_price">unit_price</SelectItem>
+                          <SelectItem value="line_total">line_total</SelectItem>
+                          <SelectItem value="customer_id">customer_id</SelectItem>
+                        </>
+                      ) : null}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleSaveMapping} disabled={savingMapping}>
+                {savingMapping ? "Saving..." : "Save and Continue"}
+              </Button>
+              <Button variant="outline" onClick={() => router.push("/imports")}>
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+      {(importData.status === "UPLOADED" || importData.status === "MAPPING") && step === "preview" ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Preview and Confirm</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">Review mapping and confirm to start processing.</p>
+            <div className="flex gap-2">
+              <Button onClick={handleConfirm} disabled={confirming}>
+                {confirming ? "Confirming..." : "Confirm Import"}
+              </Button>
+              <Button variant="outline" onClick={() => setStep("mapping")}>
+                Back to Mapping
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+      {importData.status === "COMPLETED" && !(importData.failedCount && importData.failedCount > 0) ? (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-sm">Import completed successfully. {importData.processedCount || importData.rowCount || 0} rows processed.</p>
+          </CardContent>
+        </Card>
+      ) : null}
+    </div>
+  );
+}

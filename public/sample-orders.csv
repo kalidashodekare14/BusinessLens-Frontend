@@ -1,0 +1,4 @@
+order_date,order_number,product_sku,product_name,quantity,unit_price,line_total,customer_id
+2024-01-01,ORD-001,SKU-ABC,Widget A,2,10.00,20.00,CUST-1
+2024-01-02,ORD-002,SKU-DEF,Widget B,1,25.00,25.00,CUST-2
+2024-01-03,ORD-003,SKU-ABC,Widget A,3,10.00,30.00,CUST-1

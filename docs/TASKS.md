@@ -60,13 +60,13 @@ Rules for this file:
 
 ## Phase F5 — Imports and analysis pages (Day 4–5)
 
-- [ ] **F5.1** `imports-api.ts` endpoints (list, get, create/upload, mapping, confirm, errors) with tags.
-- [ ] **F5.2** `/imports` list page (type, file name, status, counts, date) with empty state and link to the wizard.
-- [ ] **F5.3** Wizard step 1 — upload: type selector, file picker with drag-and-drop, client checks (`.csv`, ≤ 5 MB), help text on the one-row-per-line-item format, downloadable sample CSV (`public/sample-orders.csv`).
-- [ ] **F5.4** Wizard step 2 — mapping: one select per canonical field, prefilled from the backend suggestion, required markers, validation before submit. Component test.
-- [ ] **F5.5** Wizard step 3 — preview and confirm: 20-row preview table with per-row errors, "Confirm import", redirect to the import detail page.
-- [ ] **F5.6** `/imports/[importId]`: status, progress (processed/failed/total), polling while `PROCESSING`, error report table (row, field, reason), clear failed and completed-with-errors states.
-- [ ] **F5.7** `/analysis`: run history table and "Run analysis" (reusing the F3.2 hook), failure message, "View findings" on completion.
+- [x] **F5.1** `imports-api.ts` endpoints (list, get, create/upload, mapping, confirm, errors) with tags.
+- [x] **F5.2** `/imports` list page (type, file name, status, counts, date) with empty state and link to the wizard.
+- [x] **F5.3** Wizard step 1 — upload: type selector, file picker with drag-and-drop, client checks (`.csv`, ≤ 5 MB), help text on the one-row-per-line-item format, downloadable sample CSV (`public/sample-orders.csv`).
+- [x] **F5.4** Wizard step 2 — mapping: one select per canonical field, prefilled from the backend suggestion, required markers, validation before submit. Component test.
+- [x] **F5.5** Wizard step 3 — preview and confirm: 20-row preview table with per-row errors, "Confirm import", redirect to the import detail page.
+- [x] **F5.6** `/imports/[importId]`: status, progress (processed/failed/total), polling while `PROCESSING`, error report table (row, field, reason), clear failed and completed-with-errors states.
+- [x] **F5.7** `/analysis`: run history table and "Run analysis" (reusing the F3.2 hook), failure message, "View findings" on completion.
 
 ## Phase F6 — Settings and global handling (Day 5)
 
