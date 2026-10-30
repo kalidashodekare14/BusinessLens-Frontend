@@ -14,6 +14,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const status = useAppSelector((state) => state.auth.status);
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
   const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
@@ -48,8 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           method: "GET",
           credentials: "include",
           headers: ((): HeadersInit => {
-            const state = (globalThis as any).__REDUX_STORE__?.getState?.();
-            const t = state?.auth?.accessToken;
+            const t = accessToken;
             return t ? { Authorization: `Bearer ${t}` } : {};
           })(),
         }).catch(() => null);
@@ -58,8 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!meRes || !meRes.ok) {
           // If refresh didn't give us token and me failed, unauthenticated
           dispatch(clearAuth());
+        } else if (accessToken) {
+          // /users/me validated the existing access token; keep auth state authenticated
+          dispatch(setToken(accessToken));
         }
-        // If ok, user exists - auth state already set if token present
       } catch {
         if (mounted) {
           dispatch(clearAuth());
@@ -72,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, [dispatch]);
+  }, [dispatch, accessToken]);
 
   useEffect(() => {
     if (!bootstrapped) return;
