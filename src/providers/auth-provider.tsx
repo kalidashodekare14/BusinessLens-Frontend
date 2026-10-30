@@ -14,13 +14,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const status = useAppSelector((state) => state.auth.status);
-  const accessToken = useAppSelector((state) => state.auth.accessToken);
   const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
     let mounted = true;
     async function bootstrap() {
       try {
+        // Track the access token locally within this bootstrap run. The Redux
+        // selector value is captured at render time and would be stale after
+        // setToken() dispatches synchronously, which caused GET /users/me to
+        // be sent without a Bearer token on hard reload, fail with 401, clear
+        // auth, and redirect to /login.
+        let token: string | null = null;
+
         // Try refresh first
         const refreshRes = await fetch("/api/v1/auth/refresh", {
           method: "POST",
@@ -29,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!mounted) return;
         if (refreshRes.ok) {
           const data = await refreshRes.json().catch(() => null);
-          const token =
+          token =
             data?.accessToken ||
             data?.data?.accessToken ||
             data?.token ||
@@ -38,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (token) {
             dispatch(setToken(token));
           } else {
-            dispatch(setStatus("authenticated")); // might have session cookie
+            dispatch(setStatus("authenticated"));
           }
         } else {
           dispatch(setStatus("unauthenticated"));
@@ -49,8 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           method: "GET",
           credentials: "include",
           headers: ((): HeadersInit => {
-            const t = accessToken;
-            return t ? { Authorization: `Bearer ${t}` } : {};
+            return token ? { Authorization: `Bearer ${token}` } : {};
           })(),
         }).catch(() => null);
 
@@ -58,9 +63,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!meRes || !meRes.ok) {
           // If refresh didn't give us token and me failed, unauthenticated
           dispatch(clearAuth());
-        } else if (accessToken) {
+        } else if (token) {
           // /users/me validated the existing access token; keep auth state authenticated
-          dispatch(setToken(accessToken));
+          dispatch(setToken(token));
         }
       } catch {
         if (mounted) {
@@ -74,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       mounted = false;
     };
-  }, [dispatch, accessToken]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (!bootstrapped) return;
