@@ -88,7 +88,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (status === "authenticated") {
       if (isAuthRoute) {
-        router.replace("/");
+        const isRegister = pathname === "/register" || pathname?.startsWith("/register");
+        if (isRegister) {
+          router.replace("/onboarding");
+          return;
+        }
+        const next = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("next") : null;
+        if (next && next.startsWith("/")) {
+          router.replace(next);
+          return;
+        }
+        router.replace("/dashboard");
         return;
       }
     }
