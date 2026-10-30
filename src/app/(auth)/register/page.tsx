@@ -33,7 +33,7 @@ export default function RegisterPage() {
     mode: "onChange",
   });
 
-  const password = form.watch("password") || "";
+  const [password, setPassword] = useState("");
   const hasMinLength = password.length >= 10;
 
   const onSubmit = async (values: RegisterFormValues) => {
@@ -117,6 +117,10 @@ export default function RegisterPage() {
                       autoComplete="new-password"
                       placeholder="••••••••••••"
                       className="pr-10"
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setPassword(e.target.value);
+                      }}
                     />
                     <button
                       type="button"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import { selectCurrentOrgId } from "@/store/org-slice";
@@ -32,8 +32,6 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
   const orgId = useSelector(selectCurrentOrgId);
   const stepParam = searchParams.get("step");
   const [step, setStep] = useState<"mapping" | "preview">(stepParam === "preview" ? "preview" : "mapping");
-  const [mapping, setMapping] = useState<Record<string, string>>({});
-
   const { data: importData, isLoading, refetch } = useGetImportQuery(
     { organizationId: orgId!, importId },
     { skip: !orgId, pollingInterval: 2000 }
@@ -42,15 +40,18 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
   const [updateMapping, { isLoading: savingMapping }] = useUpdateImportMappingMutation();
   const [confirmImport, { isLoading: confirming }] = useConfirmImportMutation();
 
-  useEffect(() => {
+  const initialMapping = (() => {
+    const m: Record<string, string> = {};
     if (importData?.mapping) {
-      const m: Record<string, string> = {};
       Object.entries(importData.mapping).forEach(([k, v]) => {
         if (v) m[k] = v as string;
       });
-      setMapping(m);
     }
-  }, [importData]);
+    return m;
+  })();
+
+  const [mapping, setMapping] = useState<Record<string, string>>({});
+  const effectiveMapping = Object.keys(mapping).length > 0 ? mapping : initialMapping;
 
   if (isLoading || !importData) {
     return (
@@ -64,13 +65,13 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
   const handleSaveMapping = async () => {
     if (!orgId) return;
     const required = canonicalFields.filter((f) => f.required).map((f) => f.key);
-    const missing = required.filter((r) => !mapping[r]);
+    const missing = required.filter((r) => !effectiveMapping[r]);
     if (missing.length > 0) {
       toast.error("Please map all required fields");
       return;
     }
     try {
-      await updateMapping({ organizationId: orgId, importId, mapping }).unwrap();
+      await updateMapping({ organizationId: orgId, importId, mapping: effectiveMapping }).unwrap();
       toast.success("Mapping saved");
       setStep("preview");
     } catch (err: any) {
@@ -144,7 +145,7 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
                   <Label>
                     {field.label} {field.required ? <span className="text-destructive">*</span> : null}
                   </Label>
-                  <Select value={mapping[field.key] || ""} onValueChange={(v) => setMapping((m) => ({ ...m, [field.key]: v }))}>
+                  <Select value={effectiveMapping[field.key] || ""} onValueChange={(v) => setMapping((m) => ({ ...m, [field.key]: v }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select source column" />
                     </SelectTrigger>
