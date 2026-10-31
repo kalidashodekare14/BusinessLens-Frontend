@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSelector } from "react-redux";
 import { selectCurrentOrgId } from "@/store/org-slice";
@@ -30,16 +30,28 @@ const productFields = [
   { key: "price", label: "Price", required: false },
 ];
 
-export default function ImportDetailPage({ params }: { params: { importId: string } }) {
-  const { importId } = params;
+export default function ImportDetailPage({ params }: { params: { importId: string } | Promise<{ importId: string }> }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const orgId = useSelector(selectCurrentOrgId);
   const stepParam = searchParams.get("step");
   const [step, setStep] = useState<"mapping" | "preview">(stepParam === "preview" ? "preview" : "mapping");
+  const [resolvedImportId, setResolvedImportId] = useState<string | null>(null);
+
+  // Resolve params: Next.js 15+/16 may pass params as a Promise for dynamic routes.
+  // Handle both Promise and plain-object cases so importId is always available.
+  useEffect(() => {
+    const resolve = async () => {
+      const p = typeof (params as any).then === "function" ? await (params as any) : (params as any);
+      setResolvedImportId(p.importId);
+    };
+    resolve();
+  }, [params]);
+
+  const importId = resolvedImportId;
   const { data: importData, isLoading, refetch } = useGetImportQuery(
-    { organizationId: orgId!, importId },
-    { skip: !orgId, pollingInterval: 2000 }
+    { organizationId: orgId!, importId: importId! },
+    { skip: !orgId || !importId, pollingInterval: 2000 }
   );
 
   const [updateMapping, { isLoading: savingMapping }] = useUpdateImportMappingMutation();
@@ -59,10 +71,19 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
   const [mapping, setMapping] = useState<Record<string, string>>({});
   const effectiveMapping = Object.keys(mapping).length > 0 ? mapping : initialMapping;
 
+  if (!importId) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Import" description="Loading import…" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
   if (isLoading || !importData) {
     return (
       <div className="space-y-6">
-        <PageHeader title="Import" description="Loading..." />
+        <PageHeader title="Import" description="Loading…" />
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -71,7 +92,7 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
   const canonicalFields = importData.type === "PRODUCTS" ? productFields : orderFields;
 
   const handleSaveMapping = async () => {
-    if (!orgId) return;
+    if (!orgId || !importId) return;
     const required = canonicalFields.filter((f) => f.required).map((f) => f.key);
     const missing = required.filter((r) => !effectiveMapping[r]);
     if (missing.length > 0) {
@@ -88,7 +109,7 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
   };
 
   const handleConfirm = async () => {
-    if (!orgId) return;
+    if (!orgId || !importId) return;
     try {
       await confirmImport({ organizationId: orgId, importId }).unwrap();
       toast.success("Import confirmed");

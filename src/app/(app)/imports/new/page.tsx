@@ -50,8 +50,19 @@ export default function NewImportPage() {
     if (!orgId || !file) return;
     try {
       const result = await createImport({ organizationId: orgId, type, file }).unwrap();
+      // Extract import id from various possible response shapes
+      const raw = result as any;
+      const importId =
+        raw?.id ||
+        raw?.data?.id ||
+        raw?.importId ||
+        (raw?.data?.import?.id ?? null);
+      if (!importId) {
+        toast.error("Server did not return an import id");
+        return;
+      }
       toast.success("File uploaded");
-      router.push(`/imports/${result.id}?step=mapping`);
+      router.push(`/imports/${importId}?step=mapping`);
     } catch (err: any) {
       toast.error(err?.message || "Failed to upload");
     }
