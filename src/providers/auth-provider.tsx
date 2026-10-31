@@ -3,7 +3,7 @@
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setToken, clearAuth } from "@/store/auth-slice";
+import { setToken, setStatus, clearAuth } from "@/store/auth-slice";
 import { baseApi } from "@/store/base-api";
 
 const AUTH_ROUTES = ["/login", "/register"];
@@ -21,34 +21,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let mounted = true;
     async function bootstrap() {
       try {
-        // Seed from the existing session (for example the token the login or
-        // register page stored just before navigating here). /auth/refresh may
-        // upgrade it, but a refresh failure must not clobber a valid token we
-        // already hold — otherwise GET /users/me is sent without a Bearer
-        // header, 401s, clears auth and kicks the user back to /login.
+        // Seed from the existing Redux session. On SPA navigation (login/register
+        // → dashboard) the store is preserved, so the token is already here.
+        // On hard reload it is null and we must rely on /auth/refresh.
         let token: string | null = reduxAccessToken;
 
-        // Try refresh first (may return a new access token).
+        // Try refresh first (may return a new access token + new refresh cookie).
         const refreshRes = await fetch("/api/v1/auth/refresh", {
           method: "POST",
           credentials: "include",
         });
         if (!mounted) return;
+
+        let refreshOk = false;
         if (refreshRes.ok) {
+          refreshOk = true;
           const data = await refreshRes.json().catch(() => null);
           const refreshed =
             data?.accessToken ||
             data?.data?.accessToken ||
             data?.token ||
             data?.data?.token ||
-            null;
+            data?.access_token ||
+            data?.data?.access_token ||
+            (typeof data === "string" ? data : null);
           if (refreshed) {
             token = refreshed;
             dispatch(setToken(refreshed));
           }
         }
 
-        // Get current user
+        // Get current user. Send Bearer when we have a token; otherwise rely on
+        // the httpOnly refresh cookie (session-based auth) if the backend supports it.
         const meRes = await fetch("/api/v1/users/me", {
           method: "GET",
           credentials: "include",
@@ -59,8 +63,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (!mounted) return;
         if (!meRes || !meRes.ok) {
-          // No valid session: clear and let the guard redirect to /login.
-          dispatch(clearAuth());
+          // No valid /users/me session.
+          if (refreshOk && !token) {
+            // Refresh cookie is valid but no access token was returned in the
+            // body. Treat as a cookie-based session: authenticated without a
+            // bearer token (RTK Query still sends the refresh cookie on every call).
+            dispatch(setStatus("authenticated"));
+          } else {
+            // No valid session at all: clear and let the guard redirect to /login.
+            dispatch(clearAuth());
+          }
         } else if (token) {
           // /users/me validated the access token; keep auth state authenticated.
           dispatch(setToken(token));
