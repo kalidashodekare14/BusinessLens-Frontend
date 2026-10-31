@@ -100,7 +100,13 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
       return;
     }
     try {
-      await updateMapping({ organizationId: orgId, importId, mapping: effectiveMapping }).unwrap();
+      // Build mapping payload: API accepts null or omission for optional fields,
+      // but rejects empty string "". Convert empty-string (Not mapped) values to null.
+      const mappingPayload: Record<string, string | null> = {};
+      for (const [k, v] of Object.entries(effectiveMapping)) {
+        mappingPayload[k] = v || null;
+      }
+      await updateMapping({ organizationId: orgId, importId, mapping: mappingPayload }).unwrap();
       toast.success("Mapping saved");
       setStep("preview");
     } catch (err: any) {
@@ -180,24 +186,11 @@ export default function ImportDetailPage({ params }: { params: { importId: strin
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="">Not mapped</SelectItem>
-                      {(importData.mapping ? Object.keys(importData.mapping) : []).map((k) => (
-                        <SelectItem key={k} value={k}>
-                          {k}
+                      {(importData.detectedHeaders ?? []).map((h) => (
+                        <SelectItem key={h} value={h}>
+                          {h}
                         </SelectItem>
                       ))}
-                      {/* Fallback: show common headers if mapping object doesn't list sources */}
-                      {(!importData.mapping || Object.keys(importData.mapping).length === 0) ? (
-                        <>
-                          <SelectItem value="order_date">order_date</SelectItem>
-                          <SelectItem value="orderNumber">orderNumber</SelectItem>
-                          <SelectItem value="product_sku">product_sku</SelectItem>
-                          <SelectItem value="product_name">product_name</SelectItem>
-                          <SelectItem value="quantity">quantity</SelectItem>
-                          <SelectItem value="unit_price">unit_price</SelectItem>
-                          <SelectItem value="line_total">line_total</SelectItem>
-                          <SelectItem value="customer_id">customer_id</SelectItem>
-                        </>
-                      ) : null}
                     </SelectContent>
                   </Select>
                 </div>
